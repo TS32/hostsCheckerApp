@@ -1,4 +1,6 @@
 from pythonping import ping
+from python_hosts import Hosts, HostsEntry
+
 import re
 
 """
@@ -20,13 +22,48 @@ PythonPing Parameters
 | df          | bool         | Value for the Don’t Fragment flag of the IP header.                                                                                                                                                                              |
 | verbose     | bool         | True if you wish to write output to the screen.                                                                                                                                                                                  |
 | out         | file         | Where to direct the output, by default sys.stdout.   
-+==============================================================================================================                                                                                                                                                                            |
++==============================================================================================================      
+PythonPing return values:
+Since a Response is an object, you can get its properties from its members.
+
+error_message contains a string describing the error this response represents. For example, an error could be “Network Unreachable” or “Fragmentation Required”. If you got a successful response, this property is None.
+success is a bool indicating if the response is successful
+time_elapsed and time_elapsed_ms indicate how long it took to receive this response, respectively in seconds and milliseconds.
+You can access individual responses by accessing the _responses property of your ResponseList object, returned from ping(). In this case, _responses is simply a list. However, _responses are not meant to be accessed from outside the ResponseList, you should work with ResponseList directly. On top of that, ResponseList adds some intelligence you can access from its own members. The fields are self-explanatory:
+
+rtt_min and rtt_min_ms
+rtt_max and rtt_max_ms
+rtt_avg and rtt_avg_ms
+                                                                                                                                                                    |
 """
 
-if __name__ == '__main__':
 
-	hostFile = "hosts.txt"
 
+def getHosts(hostname_keyword=None):
+	my_hosts = Hosts()
+	print(my_hosts.determine_hosts_path())
+	print("Host config entries : ", my_hosts.count())
+
+	entry=0
+
+	for host in my_hosts.entries:		
+		if(host.entry_type=="ipv4"):
+			if(hostname_keyword is None): #by default print all entries
+				print(host)
+			else: #print entries with keyword
+				hostString ="".join(host.names)
+				hostString = hostString.strip().lower()
+				if(hostname_keyword.strip().lower() in hostString):
+					ipaddr=host.address
+					latency=ping(ipaddr,size = 1000,verbose=False).rtt_avg_ms
+					print(entry,f"  Latency {latency:<7.2f}ms " , host)
+					entry+=1
+	
+	if(entry==0):
+		print(hostname_keyword, " Not found in the host file!\n")
+
+
+def checkLatency(hostFile):
 	hostFile = open(hostFile,"r",encoding = "utf-8")
 
 	filecontent = hostFile.readlines()
@@ -44,3 +81,10 @@ if __name__ == '__main__':
 			hostname = hostname_list.group().strip()
 			response = ping(ipaddr,size = 1000,verbose=False)
 			print(f"{i+1:<3}  IP : {ipaddr:<15}\tLatency:{response.rtt_avg_ms:<7.2f}ms\tHost: {hostname}")
+	
+if __name__ == '__main__':
+
+	#hostFile = "hosts.txt"
+	getHosts("github")
+
+	
