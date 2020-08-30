@@ -2,6 +2,10 @@ from pythonping import ping
 import re
 
 """
+
+Use PythonPing to check the host reachable and connectivity.
+
+
 PythonPing Parameters
 +==========================================================================================================
 | Parameter   | Type         | Description  
