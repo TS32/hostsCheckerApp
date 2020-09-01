@@ -142,10 +142,10 @@ def getGitHubLatestIpAddress():
 			soup = BeautifulSoup(response.text, features = 'lxml')		
 			match_result = soup.find_all('ul', {'class': 'comma-separated'})
 			match_result_backup = soup.find_all('li')	
-			print(f"{servername:<{width}}\n \
-					{'None' if match_result is None else match_result[0].text[0:15]}\n \
-					{'None' if match_result_backup is None else match_result_backup[0].text[0:15]}\n \
-				 ")
+			# print(f"{servername:<{width}}\n \
+			# 		{'None' if match_result is None else match_result[0].text[0:15]}\n \
+			# 		{'None' if match_result_backup is None else match_result_backup[0].text[0:15]}\n \
+			# 	 ")
 
 			serverIp = None
 			
