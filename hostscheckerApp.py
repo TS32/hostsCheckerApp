@@ -1,6 +1,8 @@
+from ssl import match_hostname
 from pythonping import ping
 from python_hosts import Hosts, HostsEntry
-
+import requests
+from bs4 import BeautifulSoup
 import re
 
 """
@@ -37,9 +39,7 @@ rtt_avg and rtt_avg_ms
                                                                                                                                                                     |
 """
 
-
-
-def getHosts(hostname_keyword=None):
+def checkHostsLatency(hostname_keyword=None):
 	my_hosts = Hosts()
 	print(my_hosts.determine_hosts_path())
 	print("Host config entries : ", my_hosts.count())
@@ -80,11 +80,138 @@ def checkLatency(hostFile):
 			ipaddr= ip_list.group().strip()
 			hostname = hostname_list.group().strip()
 			response = ping(ipaddr,size = 1000,verbose=False)
-			print(f"{i+1:<3}  IP : {ipaddr:<15}\tLatency:{response.rtt_avg_ms:<7.2f}ms\tHost: {hostname}")
+			print(f"{i+1:<3}  IP : {ipaddr:<15}\tLatency : {response.rtt_avg_ms:<7.2f}ms\tHost : {hostname}")
+
+def getGitHubLatestIpAddress():
+	""" Get IPaddress of each server from Ipaddresss.com """
+	ServerNamesList =[
+				'github.com',
+				'gist.github.com',
+				'assets-cdn.github.com',
+				'raw.githubusercontent.com',
+				'github-cloud.s3.amazonaws.com',
+				'github.global.ssl.fastly.net',
+				'codeload.github.com',
+				'gist.githubusercontent.com',
+				'cloud.githubusercontent.com',
+				'camo.githubusercontent.com',
+				'avatars0.githubusercontent.com',
+				'avatars1.githubusercontent.com',
+				'avatars2.githubusercontent.com',
+				'avatars3.githubusercontent.com',
+				'avatars4.githubusercontent.com',
+				'avatars5.githubusercontent.com',
+				'avatars6.githubusercontent.com',
+				'avatars7.githubusercontent.com',
+				'avatars8.githubusercontent.com'
+				]	
+	ServerLinksList =[
+				'https://github.com.ipaddress.com/', # github.com
+				'https://github.com.ipaddress.com/gist.github.com', # gist.github.com
+				'https://github.com.ipaddress.com/assets-cdn.github.com', # assets-cdn.github.com	
+				'https://githubusercontent.com.ipaddress.com/raw.githubusercontent.com',# raw.githubusercontent.com
+				'https://amazonaws.com.ipaddress.com/github-cloud.s3.amazonaws.com',# github-cloud.s3.amazonaws.com
+				'https://fastly.net.ipaddress.com/github.global.ssl.fastly.net', #github.global.ssl.fastly.net
+				'https://github.com.ipaddress.com/codeload.github.com',#codeload.github.com
+				'https://githubusercontent.com.ipaddress.com/gist.githubusercontent.com',#gist.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/cloud.githubusercontent.com',#cloud.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/camo.githubusercontent.com',#camo.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars0.githubusercontent.com',#avatars0.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars1.githubusercontent.com',#avatars1.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars2.githubusercontent.com',#avatars2.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars3.githubusercontent.com',#avatars3.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars4.githubusercontent.com',#avatars4.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars5.githubusercontent.com',#avatars5.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars6.githubusercontent.com',#avatars6.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars7.githubusercontent.com',#avatars7.githubusercontent.com
+				'https://githubusercontent.com.ipaddress.com/avatars8.githubusercontent.com' #avatars8.githubusercontent.com
+				
+				
+				]	
+	ServerIpAddressList=[]
+	Request_Header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
 	
+	ip_address_pattern = r"[1-9]\d{0,2}\.\d{1,3}\.\d{1,3}\.\d{1,3}[\s\t]*"
+
+	width = max([len(k) for k in ServerNamesList])+4
+
+	for index,serverLinks in enumerate(ServerLinksList):
+		servername = ServerNamesList[index]		
+		try:
+			response = requests.get(serverLinks, Request_Header,timeout=(15,15))
+			soup = BeautifulSoup(response.text, features = 'lxml')		
+			match_result = soup.find_all('ul', {'class': 'comma-separated'})
+			match_result_backup = soup.find_all('li')	
+			print(f"{servername:<{width}}\n \
+					{'None' if match_result is None else match_result[0].text[0:15]}\n \
+					{'None' if match_result_backup is None else match_result_backup[0].text[0:15]}\n \
+				 ")
+
+			serverIp = None
+			
+			if(match_result is not None and len(match_result)):
+				serverIp = re.search(ip_address_pattern,match_result[0].text)
+				if serverIp is not None:
+					serverIp = serverIp.group().strip()
+					ServerIpAddressList.append({"Ip":serverIp,"Host":servername})
+					latency=ping(serverIp,size = 1000,verbose=False).rtt_avg_ms
+					print(f'{index:<6}:  {serverIp:<15}    {servername:<{width}}  Latency : {latency}ms')				
+
+			if(match_result_backup is not None):# There is no match, then check if there is other matches				
+				if match_result_backup is not None and len(match_result_backup):
+					iplist=[]					
+					for i in range(len(match_result_backup)):
+						ip = re.search(ip_address_pattern,match_result_backup[i].text) 
+						if ip is not None:
+							ip = ip.group().strip()
+						else:
+							continue  # does not contain IP, skip
+
+						if(ip not in iplist) and ((serverIp is not None ) and (ip!=serverIp) or (serverIp is None)):	
+							iplist.append(ip)
+							latency=ping(ip,size = 1000,verbose=False).rtt_avg_ms
+							print(f'{index:<3}.{i:<2}:  {ip:<15}    {servername:<{width}}  Latency : {latency}ms')
+							ServerIpAddressList.append({"Ip":ip,"Host":servername})
+			if(match_result_backup is None and match_result is None):
+				print(f'{index:<6}:  {"IP Not Found!  "}    {servername}')	
+		except Exception as e:
+			print(e)
+			print(f'{index:<3}:  {"Exception!     "}    {servername}')
+	if(len(ServerIpAddressList)):
+		return ServerIpAddressList
+	else:
+		return None
+
+def updateHostsConfigFile(newEntriesList):
+	my_hosts = Hosts()
+	print("Locate the hosts config from : ", my_hosts.determine_hosts_path())
+	print("Host config entries number : ", my_hosts.count())
+	
+	#step 1, remove all the entries with the same name
+	for entry in newEntriesList:
+		my_hosts.remove_all_matching(name=entry['Host'])
+	
+	#step 2, add the entry from the new entry list
+	for entry in newEntriesList:
+		new_entry = HostsEntry(entry_type='ipv4', address=entry['Ip'], names=entry['Host'])
+		ret=my_hosts.add([new_entry],allow_address_duplication=True)
+		print(f"Add ipv4 entry for:  {new_entry}\n\tOperation result : {ret}")
+	
+	#step 3, write the host file
+	result = my_hosts.write()
+	print(f"Done! new host file saved!\n{result}")
+
 if __name__ == '__main__':
 
 	#hostFile = "hosts.txt"
-	getHosts("github")
+	#checkLatency(hostFile)
+	#checkHostsLatency("github")
 
-	
+	entryList = getGitHubLatestIpAddress()
+	if(entryList is not None):
+		updateHostsConfigFile(entryList)
+	else:
+		print("Nothing updated for the hosts file! ")
+
+
+

@@ -1,35 +1,32 @@
-# Github Hosts
-# update: 2020-08-16
-
-140.82.114.4 github.com
-140.82.114.9 nodeload.github.com
-140.82.114.5 api.github.com
-140.82.112.18 training.github.com
-140.82.113.10 codeload.github.com
-
-185.199.108.153 assets-cdn.github.com
-185.199.108.153 documentcloud.github.com
-185.199.108.154 help.github.com
-185.199.108.153 githubstatus.com
-
-199.232.69.194 github.global.ssl.fastly.net
-199.232.68.133 raw.github.com
-199.232.68.133 raw.githubusercontent.com
-199.232.68.133 cloud.githubusercontent.com
-199.232.68.133 gist.githubusercontent.com
-199.232.68.133 marketplace-screenshots.githubusercontent.com
-199.232.68.133 repository-images.githubusercontent.com
-199.232.68.133 user-images.githubusercontent.com
-199.232.68.133 desktop.githubusercontent.com
-
-199.232.68.133 avatars0.githubusercontent.com
-199.232.68.133 avatars1.githubusercontent.com
-199.232.68.133 avatars2.githubusercontent.com
-199.232.68.133 avatars3.githubusercontent.com
-199.232.68.133 avatars4.githubusercontent.com
-199.232.68.133 avatars5.githubusercontent.com
-199.232.68.133 avatars6.githubusercontent.com
-199.232.68.133 avatars7.githubusercontent.com
-199.232.68.133 avatars8.githubusercontent.com
-
-#Github hosts end
+# Github Hosts 
+# update: 2020-08-16 
+ 
+ github               140.82.114.4 
+ nodeload.github               140.82.114.9 
+ api.github               140.82.114.5 
+ training.github               140.82.112.18 
+ codeload.github               140.82.113.10 
+ assets-cdn.github               185.199.108.153 
+ documentcloud.github               185.199.108.153 
+ help.github               185.199.108.154 
+ githubstatus               185.199.108.153 
+ github.global.ssl.fastly.net 199.232.69.194 
+ raw.github               199.232.68.133 
+ raw.githubusercontent               199.232.68.133 
+ cloud.githubusercontent               199.232.68.133 
+ gist.githubusercontent               199.232.68.133 
+ marketplace-screenshots.githubusercontent               199.232.68.133 
+ repository-images.githubusercontent               199.232.68.133 
+ user-images.githubusercontent               199.232.68.133 
+ desktop.githubusercontent               199.232.68.133 
+ avatars0.githubusercontent               199.232.68.133 
+ avatars1.githubusercontent               199.232.68.133 
+ avatars2.githubusercontent               199.232.68.133 
+ avatars3.githubusercontent               199.232.68.133 
+ avatars4.githubusercontent               199.232.68.133 
+ avatars5.githubusercontent               199.232.68.133 
+ avatars6.githubusercontent               199.232.68.133 
+ avatars7.githubusercontent               199.232.68.133 
+ avatars8.githubusercontent               199.232.68.133 
+ 
+#Github hosts end 
