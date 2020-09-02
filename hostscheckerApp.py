@@ -85,67 +85,61 @@ def checkLatency(hostFile):
 def getGitHubLatestIpAddress():
 	""" Get IPaddress of each server from Ipaddresss.com """
 	ServerNamesList =[
-				'github.com',
-				'gist.github.com',
-				'assets-cdn.github.com',
-				'raw.githubusercontent.com',
-				'github-cloud.s3.amazonaws.com',
-				'github.global.ssl.fastly.net',
-				'codeload.github.com',
-				'gist.githubusercontent.com',
-				'cloud.githubusercontent.com',
-				'camo.githubusercontent.com',
-				'avatars0.githubusercontent.com',
-				'avatars1.githubusercontent.com',
-				'avatars2.githubusercontent.com',
-				'avatars3.githubusercontent.com',
-				'avatars4.githubusercontent.com',
-				'avatars5.githubusercontent.com',
-				'avatars6.githubusercontent.com',
-				'avatars7.githubusercontent.com',
-				'avatars8.githubusercontent.com'
+				'github.com',  #1
+				'gist.github.com', #2
+				'assets-cdn.github.com', #3
+				'raw.githubusercontent.com', #4
+				'github-cloud.s3.amazonaws.com', #5
+				'github.global.ssl.fastly.net', #6
+				'codeload.github.com', #7
+				'nodeload.github.com', #8
+				'gist.githubusercontent.com', #9
+				'cloud.githubusercontent.com', #10
+				'camo.githubusercontent.com', #11
+				'avatars0.githubusercontent.com', #12
+				'avatars1.githubusercontent.com', #13
+				'avatars2.githubusercontent.com', #14
+				'avatars3.githubusercontent.com', #15
+				'avatars4.githubusercontent.com', #16
+				'avatars5.githubusercontent.com', #17
+				'avatars6.githubusercontent.com', #18
+				'avatars7.githubusercontent.com', #19
+				'avatars8.githubusercontent.com', #20
+				'api.github.com', #21
+				'training.github.com', #22
+				'documentcloud.github.com', #23
+				'help.github.com', #24
+				'githubstatus.com', #25
+				'raw.github.com', #26
+				'marketplace-screenshots.githubusercontent.com', #27
+				'repository-images.githubusercontent.com', #28
+				'user-images.githubusercontent.com', #29
+				'desktop.githubusercontent.com', #30
 				]	
-	ServerLinksList =[
-				'https://github.com.ipaddress.com/', # github.com
-				'https://github.com.ipaddress.com/gist.github.com', # gist.github.com
-				'https://github.com.ipaddress.com/assets-cdn.github.com', # assets-cdn.github.com	
-				'https://githubusercontent.com.ipaddress.com/raw.githubusercontent.com',# raw.githubusercontent.com
-				'https://amazonaws.com.ipaddress.com/github-cloud.s3.amazonaws.com',# github-cloud.s3.amazonaws.com
-				'https://fastly.net.ipaddress.com/github.global.ssl.fastly.net', #github.global.ssl.fastly.net
-				'https://github.com.ipaddress.com/codeload.github.com',#codeload.github.com
-				'https://githubusercontent.com.ipaddress.com/gist.githubusercontent.com',#gist.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/cloud.githubusercontent.com',#cloud.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/camo.githubusercontent.com',#camo.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars0.githubusercontent.com',#avatars0.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars1.githubusercontent.com',#avatars1.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars2.githubusercontent.com',#avatars2.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars3.githubusercontent.com',#avatars3.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars4.githubusercontent.com',#avatars4.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars5.githubusercontent.com',#avatars5.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars6.githubusercontent.com',#avatars6.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars7.githubusercontent.com',#avatars7.githubusercontent.com
-				'https://githubusercontent.com.ipaddress.com/avatars8.githubusercontent.com' #avatars8.githubusercontent.com
-				
-				
-				]	
+
 	ServerIpAddressList=[]
+
+	#getUrlLinksFromServername(ServerNamesList)
+	baseURL = r"https://www.ipaddress.com/search/"
+
 	Request_Header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
 	
 	ip_address_pattern = r"[1-9]\d{0,2}\.\d{1,3}\.\d{1,3}\.\d{1,3}[\s\t]*"
 
 	width = max([len(k) for k in ServerNamesList])+4
 
-	for index,serverLinks in enumerate(ServerLinksList):
-		servername = ServerNamesList[index]		
+	for index,servername in enumerate(ServerNamesList):		
+		actionURL = baseURL + servername
 		try:
-			response = requests.get(serverLinks, Request_Header,timeout=(15,15))
+			response = requests.get(actionURL, headers = Request_Header,timeout=(15,15))
+			ServerLink = response.url
+			if(response.status_code!=200):
+				print(f"\nServer {servername} return status code {response.status_code} ( {response.reason} ), Abort!\n")
+				continue  #if the ipadress.com dose not return a valid page, then switch to the enxt host
+
 			soup = BeautifulSoup(response.text, features = 'lxml')		
 			match_result = soup.find_all('ul', {'class': 'comma-separated'})
 			match_result_backup = soup.find_all('li')	
-			# print(f"{servername:<{width}}\n \
-			# 		{'None' if match_result is None else match_result[0].text[0:15]}\n \
-			# 		{'None' if match_result_backup is None else match_result_backup[0].text[0:15]}\n \
-			# 	 ")
 
 			serverIp = None
 			
@@ -170,7 +164,8 @@ def getGitHubLatestIpAddress():
 						if(ip not in iplist) and ((serverIp is not None ) and (ip!=serverIp) or (serverIp is None)):	
 							iplist.append(ip)
 							latency=ping(ip,size = 1000,verbose=False).rtt_avg_ms
-							print(f'{index:<2}.{i:<2}:  {ip:<15}    {servername:<{width}}  Latency : {latency}ms')
+							bulletStr = f"{index}.{i}"
+							print(f'{bulletStr:<6}:  {ip:<15}    {servername:<{width}}  Latency : {latency}ms')
 							ServerIpAddressList.append({"Ip":ip,"Host":servername})
 			if(match_result_backup is None and match_result is None):
 				print(f'{index:<6}:  {"IP Not Found!  "}    {servername}')	
@@ -204,15 +199,27 @@ def updateHostsConfigFile(newEntriesList):
 		print('\n'.join(f'{k} : {v}' for k,v in sorted(result.items())))
 	else:
 		print("Error! update host file failed! \n")
-	
+
+def getUrlLinksFromServername(ServerList):
+	Request_Header = {'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.149 Safari/537.36'}
+	baseURL = r"https://www.ipaddress.com/search/"
+	width = max([len(k) for k in ServerList])+4
+	for index, host in enumerate(ServerList):
+		actionURL = baseURL + host
+		response = requests.get(actionURL,headers = Request_Header)
+		if(response.status_code==200):
+			print(f"{(index+1):<3}  {host:<{width}}  {response.url}")
+		else:
+			print(f"\n {actionURL} returns error, status_code ={response.status_code}( {response.reason} )\n")
 
 if __name__ == '__main__':
 
 	#hostFile = "hosts.txt"
 	#checkLatency(hostFile)
 	#checkHostsLatency("github")
-
+        
 	entryList = getGitHubLatestIpAddress()
+
 	if(entryList is not None):
 		updateHostsConfigFile(entryList)
 	else:
