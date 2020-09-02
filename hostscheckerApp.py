@@ -170,7 +170,7 @@ def getGitHubLatestIpAddress():
 						if(ip not in iplist) and ((serverIp is not None ) and (ip!=serverIp) or (serverIp is None)):	
 							iplist.append(ip)
 							latency=ping(ip,size = 1000,verbose=False).rtt_avg_ms
-							print(f'{index:<3}.{i:<2}:  {ip:<15}    {servername:<{width}}  Latency : {latency}ms')
+							print(f'{index:<2}.{i:<2}:  {ip:<15}    {servername:<{width}}  Latency : {latency}ms')
 							ServerIpAddressList.append({"Ip":ip,"Host":servername})
 			if(match_result_backup is None and match_result is None):
 				print(f'{index:<6}:  {"IP Not Found!  "}    {servername}')	
@@ -193,13 +193,18 @@ def updateHostsConfigFile(newEntriesList):
 	
 	#step 2, add the entry from the new entry list
 	for entry in newEntriesList:
-		new_entry = HostsEntry(entry_type='ipv4', address=entry['Ip'], names=entry['Host'])
+		new_entry = HostsEntry(entry_type='ipv4', address=entry['Ip'], names= [entry['Host']])
 		ret=my_hosts.add([new_entry],allow_address_duplication=True)
-		print(f"Add ipv4 entry for:  {new_entry}\n\tOperation result : {ret}")
+		print(f"Add ipv4 entry for:  {new_entry}\n\tOperation result : {ret}\n")
 	
 	#step 3, write the host file
 	result = my_hosts.write()
-	print(f"Done! new host file saved!\n{result}")
+	if(result is not None):
+		print("Done! new host file saved! result : \n")
+		print('\n'.join(f'{k} : {v}' for k,v in sorted(result.items())))
+	else:
+		print("Error! update host file failed! \n")
+	
 
 if __name__ == '__main__':
 
