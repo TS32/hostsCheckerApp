@@ -1,0 +1,4 @@
+pythonping==1.0.13
+python_hosts==1.0.0
+requests==2.24.0
+beautifulsoup4==4.9.1
