@@ -1,5 +1,7 @@
 # Modify hosts config file to speedup access to github.com #
 
+国内访问Github经常不稳定，速度很慢。其中原因之一就是国内DNS域名解析。这个脚本的功能是通过ipaddress.com查询Github各服务器最新的地址，并且检测到每个IP地址的网络访问延迟，最后将最新的IP地址和服务器的名字写入到系统的hosts文件，这样每次访问github的时候就不用通过国内的DNS了。
+
 ## Purpose ##
 
 This script file provide a way to lookup the ip address of a given server name. and add the <IP> <Servername> pair to hosts config file.
